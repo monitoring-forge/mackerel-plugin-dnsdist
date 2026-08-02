@@ -87,7 +87,6 @@ func main() {
 			runtime.Version(),
 			commit)
 		os.Exit(OK)
-		return
 	} else if flags.WroteHelp(err) {
 		fmt.Fprintf(os.Stdout, "%v\n", err)
 		os.Exit(OK)

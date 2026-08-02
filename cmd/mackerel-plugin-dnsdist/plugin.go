@@ -111,6 +111,10 @@ func (p *Plugin) FetchMetrics() (map[string]float64, error) {
 	}
 	defer res.Body.Close()
 
+	if res.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("unexpected status code: %d", res.StatusCode)
+	}
+
 	t := map[string]any{}
 	decoder := json.NewDecoder(res.Body)
 	decoder.UseNumber()
