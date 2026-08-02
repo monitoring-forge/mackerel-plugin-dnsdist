@@ -57,7 +57,7 @@ func (p *Plugin) MetricsDefinition(label string, metrics []mp.Metrics) mp.Graphs
 
 func (p *Plugin) GraphDefinition() map[string]mp.Graphs {
 	return map[string]mp.Graphs{
-		"acl-drop": p.MetricsDefinition("Dropped packets becaused of the ACL", []mp.Metrics{
+		"acl-drop": p.MetricsDefinition("Dropped packets because of the ACL", []mp.Metrics{
 			{Name: "acl-drops", Label: "Dropped", Diff: true},
 		}),
 		"cache": p.MetricsDefinition("Packet Cache", []mp.Metrics{

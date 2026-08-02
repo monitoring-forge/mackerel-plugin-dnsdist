@@ -52,7 +52,9 @@ func (o *Opt) GetAPIKey() string {
 	}
 
 	if configPath := os.Getenv("DNSDIST_CONFIG_PATH"); configPath != "" {
-		return getAPIKeyFromFile(configPath)
+		if apiKey := getAPIKeyFromFile(configPath); apiKey != "" {
+			return apiKey
+		}
 	}
 
 	return getAPIKeyFromFile("/etc/dnsdist/dnsdist.conf")
