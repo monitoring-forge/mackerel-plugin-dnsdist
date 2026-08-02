@@ -47,77 +47,53 @@ func (p *Plugin) MetricKeyPrefix() string {
 	return p.Prefix
 }
 
-func (p *Plugin) GraphDefinition() map[string]mp.Graphs {
+func (p *Plugin) MetricsDefinition(label string, metrics []mp.Metrics) mp.Graphs {
 	labelPrefix := cases.Title(language.Und, cases.NoLower).String(p.Prefix)
+	return mp.Graphs{
+		Label:   labelPrefix + ": " + label,
+		Unit:    "integer",
+		Metrics: metrics,
+	}
+}
+
+func (p *Plugin) GraphDefinition() map[string]mp.Graphs {
 	return map[string]mp.Graphs{
-		"acl-drop": {
-			Label: labelPrefix + ": Dropped packets becaused of the ACL",
-			Unit:  "integer",
-			Metrics: []mp.Metrics{
-				{Name: "acl-drops", Label: "Dropped", Diff: true},
-			},
-		},
-		"cache": {
-			Label: labelPrefix + ": Packet Cache",
-			Unit:  "integer",
-			Metrics: []mp.Metrics{
-				{Name: "cache-hits", Label: "Hits", Stacked: true, Diff: true},
-				{Name: "cache-misses", Label: "Misses", Stacked: true, Diff: true},
-			},
-		},
-		"downstream-errors": {
-			Label: labelPrefix + ": Backend errors",
-			Unit:  "integer",
-			Metrics: []mp.Metrics{
-				{Name: "downstream-send-errors", Label: "Send error", Diff: true},
-				{Name: "downstream-timeouts", Label: "Timeouts", Diff: true},
-			},
-		},
-		"latency": {
-			Label: labelPrefix + ": Latency (microseconds)",
-			Unit:  "integer",
-			Metrics: []mp.Metrics{
-				{Name: "latency-avg100", Label: "Latency100"},
-				{Name: "latency-avg1000", Label: "Latency1000"},
-				{Name: "latency-avg10000", Label: "Latency10000"},
-				{Name: "latency-avg1000000", Label: "Latency1000000"},
-			},
-		},
-		"queries": {
-			Label: labelPrefix + ": Queries",
-			Unit:  "integer",
-			Metrics: []mp.Metrics{
-				{Name: "queries", Label: "Queries", Diff: true},
-				{Name: "rdqueries", Label: "Query with rd bit", Diff: true},
-			},
-		},
-		"responses": {
-			Label: labelPrefix + ": Response",
-			Unit:  "integer",
-			Metrics: []mp.Metrics{
-				{Name: "responses", Label: "Backend responses", Diff: true},
-				{Name: "self-answered", Label: "Self answered", Diff: true},
-				{Name: "servfail-responses", Label: "Backend servfail", Diff: true},
-			},
-		},
-		"rule": {
-			Label: labelPrefix + ": Returned because of rules",
-			Unit:  "integer",
-			Metrics: []mp.Metrics{
-				{Name: "rule-drop", Label: "Drop", Stacked: true, Diff: true},
-				{Name: "rule-nxdomain", Label: "Nxdomain", Stacked: true, Diff: true},
-				{Name: "rule-refused", Label: "Refused", Stacked: true, Diff: true},
-				{Name: "rule-servfail", Label: "Servfail", Stacked: true, Diff: true},
-				{Name: "rule-truncated", Label: "Truncated", Stacked: true, Diff: true},
-			},
-		},
-		"fd": {
-			Label: labelPrefix + ": FD usage",
-			Unit:  "integer",
-			Metrics: []mp.Metrics{
-				{Name: "fd-usage", Label: "usage"},
-			},
-		},
+		"acl-drop": p.MetricsDefinition("Dropped packets becaused of the ACL", []mp.Metrics{
+			{Name: "acl-drops", Label: "Dropped", Diff: true},
+		}),
+		"cache": p.MetricsDefinition("Packet Cache", []mp.Metrics{
+			{Name: "cache-hits", Label: "Hits", Stacked: true, Diff: true},
+			{Name: "cache-misses", Label: "Misses", Stacked: true, Diff: true},
+		}),
+		"downstream-errors": p.MetricsDefinition("Backend errors", []mp.Metrics{
+			{Name: "downstream-send-errors", Label: "Send error", Diff: true},
+			{Name: "downstream-timeouts", Label: "Timeouts", Diff: true},
+		}),
+		"latency": p.MetricsDefinition("Latency (microseconds)", []mp.Metrics{
+			{Name: "latency-avg100", Label: "Latency100"},
+			{Name: "latency-avg1000", Label: "Latency1000"},
+			{Name: "latency-avg10000", Label: "Latency10000"},
+			{Name: "latency-avg1000000", Label: "Latency1000000"},
+		}),
+		"queries": p.MetricsDefinition("Queries", []mp.Metrics{
+			{Name: "queries", Label: "Queries", Diff: true},
+			{Name: "rdqueries", Label: "Query with rd bit", Diff: true},
+		}),
+		"responses": p.MetricsDefinition("Response", []mp.Metrics{
+			{Name: "responses", Label: "Backend responses", Diff: true},
+			{Name: "self-answered", Label: "Self answered", Diff: true},
+			{Name: "servfail-responses", Label: "Backend servfail", Diff: true},
+		}),
+		"rule": p.MetricsDefinition("Returned because of rules", []mp.Metrics{
+			{Name: "rule-drop", Label: "Drop", Stacked: true, Diff: true},
+			{Name: "rule-nxdomain", Label: "Nxdomain", Stacked: true, Diff: true},
+			{Name: "rule-refused", Label: "Refused", Stacked: true, Diff: true},
+			{Name: "rule-servfail", Label: "Servfail", Stacked: true, Diff: true},
+			{Name: "rule-truncated", Label: "Truncated", Stacked: true, Diff: true},
+		}),
+		"fd": p.MetricsDefinition("FD usage", []mp.Metrics{
+			{Name: "fd-usage", Label: "usage"},
+		}),
 	}
 }
 
