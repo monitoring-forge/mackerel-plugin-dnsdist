@@ -1,25 +1,18 @@
 VERSION=0.0.4
-LDFLAGS=-ldflags "-w -s -X main.version=${VERSION}"
+GITCOMMIT?=$(shell git describe --dirty --always 2>/dev/null)
+LDFLAGS=-ldflags "-w -s -X main.version=${VERSION} -X main.commit=${GITCOMMIT}"
 all: mackerel-plugin-dnsdist
 
 .PHONY: mackerel-plugin-dnsdist
 
-mackerel-plugin-dnsdist: cmd/mackerel-plugin-dnsdist/main.go
-	go build $(LDFLAGS) -o mackerel-plugin-dnsdist cmd/mackerel-plugin-dnsdist/main.go
+mackerel-plugin-dnsdist: cmd/mackerel-plugin-dnsdist/*.go
+	go build $(LDFLAGS) -o mackerel-plugin-dnsdist ./cmd/mackerel-plugin-dnsdist/
 
-linux: cmd/mackerel-plugin-dnsdist/main.go
-	GOOS=linux GOARCH=amd64 go build $(LDFLAGS) -o mackerel-plugin-dnsdist cmd/mackerel-plugin-dnsdist/main.go
-
-fmt:
-	go fmt ./...
+linux: cmd/mackerel-plugin-dnsdist/*.go
+	GOOS=linux GOARCH=amd64 go build $(LDFLAGS) -o mackerel-plugin-dnsdist ./cmd/mackerel-plugin-dnsdist/
 
 check:
-	go test ./...
+	go test -v ./...
 
-clean:
-	rm -rf mackerel-plugin-dnsdist
-
-tag:
-	git tag v${VERSION}
-	git push origin v${VERSION}
-	git push origin main
+lint:
+	golangci-lint run --timeout 5m ./...
