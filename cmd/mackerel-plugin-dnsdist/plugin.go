@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net"
 	"net/http"
-	"strconv"
 	"time"
 
 	mp "github.com/mackerelio/go-mackerel-plugin"
@@ -125,11 +124,11 @@ func (p *Plugin) FetchMetrics() (map[string]float64, error) {
 
 	result := map[string]float64{}
 	for k, b := range t {
-		f, err := strconv.ParseFloat(fmt.Sprintf("%v", b), 64)
-		if err != nil {
-			continue
+		if num, ok := b.(json.Number); ok {
+			if f, err := num.Float64(); err == nil {
+				result[k] = f
+			}
 		}
-		result[k] = f
 	}
 	return result, nil
 }
