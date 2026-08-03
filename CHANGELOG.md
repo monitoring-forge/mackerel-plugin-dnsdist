@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.0.6](https://github.com/monitoring-forge/mackerel-plugin-dnsdist/compare/v0.0.5...v0.0.6) - 2026-08-03
+
+- Sync files with `monitoring-forge/github-common` by @monitoring-forge-files-sync-action[bot] in https://github.com/monitoring-forge/mackerel-plugin-dnsdist/pull/4
+
 ## [v0.0.5](https://github.com/monitoring-forge/mackerel-plugin-dnsdist/compare/v0.0.4...v0.0.5) - 2026-08-02
 
 - Improve packaging and code quality by @kazeburo in https://github.com/monitoring-forge/mackerel-plugin-dnsdist/pull/1
