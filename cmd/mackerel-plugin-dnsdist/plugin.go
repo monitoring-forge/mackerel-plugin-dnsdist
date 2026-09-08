@@ -12,42 +12,36 @@ import (
 	"golang.org/x/text/language"
 )
 
-type Plugin struct {
-	Prefix  string
-	URL     string
-	Timeout time.Duration
-	APIKey  string
-}
-
-func (p *Plugin) httpClient() *http.Client {
+func (opt *Opt) httpClient() *http.Client {
 	transport := &http.Transport{
 		// inherited http.DefaultTransport
 		Proxy: http.ProxyFromEnvironment,
 		DialContext: (&net.Dialer{
-			Timeout:   p.Timeout,
-			KeepAlive: p.Timeout,
+			Timeout:   opt.Timeout,
+			KeepAlive: opt.Timeout,
 		}).DialContext,
-		TLSHandshakeTimeout:   p.Timeout,
+		TLSHandshakeTimeout:   opt.Timeout,
 		ExpectContinueTimeout: 1 * time.Second,
-		ResponseHeaderTimeout: p.Timeout,
+		ResponseHeaderTimeout: opt.Timeout,
 	}
 	return &http.Client{
 		Transport: transport,
+		Timeout:   opt.Timeout,
 		CheckRedirect: func(req *http.Request, via []*http.Request) error {
 			return http.ErrUseLastResponse
 		},
 	}
 }
 
-func (p *Plugin) MetricKeyPrefix() string {
-	if p.Prefix == "" {
-		p.Prefix = "dnsdist"
+func (opt *Opt) MetricKeyPrefix() string {
+	if opt.Prefix == "" {
+		opt.Prefix = "dnsdist"
 	}
-	return p.Prefix
+	return opt.Prefix
 }
 
-func (p *Plugin) MetricsDefinition(label string, metrics []mp.Metrics) mp.Graphs {
-	labelPrefix := cases.Title(language.Und, cases.NoLower).String(p.Prefix)
+func (opt *Opt) MetricsDefinition(label string, metrics []mp.Metrics) mp.Graphs {
+	labelPrefix := cases.Title(language.Und, cases.NoLower).String(opt.Prefix)
 	return mp.Graphs{
 		Label:   labelPrefix + ": " + label,
 		Unit:    "integer",
@@ -55,56 +49,56 @@ func (p *Plugin) MetricsDefinition(label string, metrics []mp.Metrics) mp.Graphs
 	}
 }
 
-func (p *Plugin) GraphDefinition() map[string]mp.Graphs {
+func (opt *Opt) GraphDefinition() map[string]mp.Graphs {
 	return map[string]mp.Graphs{
-		"acl-drop": p.MetricsDefinition("Dropped packets because of the ACL", []mp.Metrics{
+		"acl-drop": opt.MetricsDefinition("Dropped packets because of the ACL", []mp.Metrics{
 			{Name: "acl-drops", Label: "Dropped", Diff: true},
 		}),
-		"cache": p.MetricsDefinition("Packet Cache", []mp.Metrics{
+		"cache": opt.MetricsDefinition("Packet Cache", []mp.Metrics{
 			{Name: "cache-hits", Label: "Hits", Stacked: true, Diff: true},
 			{Name: "cache-misses", Label: "Misses", Stacked: true, Diff: true},
 		}),
-		"downstream-errors": p.MetricsDefinition("Backend errors", []mp.Metrics{
+		"downstream-errors": opt.MetricsDefinition("Backend errors", []mp.Metrics{
 			{Name: "downstream-send-errors", Label: "Send error", Diff: true},
 			{Name: "downstream-timeouts", Label: "Timeouts", Diff: true},
 		}),
-		"latency": p.MetricsDefinition("Latency (microseconds)", []mp.Metrics{
+		"latency": opt.MetricsDefinition("Latency (microseconds)", []mp.Metrics{
 			{Name: "latency-avg100", Label: "Latency100"},
 			{Name: "latency-avg1000", Label: "Latency1000"},
 			{Name: "latency-avg10000", Label: "Latency10000"},
 			{Name: "latency-avg1000000", Label: "Latency1000000"},
 		}),
-		"queries": p.MetricsDefinition("Queries", []mp.Metrics{
+		"queries": opt.MetricsDefinition("Queries", []mp.Metrics{
 			{Name: "queries", Label: "Queries", Diff: true},
 			{Name: "rdqueries", Label: "Query with rd bit", Diff: true},
 		}),
-		"responses": p.MetricsDefinition("Response", []mp.Metrics{
+		"responses": opt.MetricsDefinition("Response", []mp.Metrics{
 			{Name: "responses", Label: "Backend responses", Diff: true},
 			{Name: "self-answered", Label: "Self answered", Diff: true},
 			{Name: "servfail-responses", Label: "Backend servfail", Diff: true},
 		}),
-		"rule": p.MetricsDefinition("Returned because of rules", []mp.Metrics{
+		"rule": opt.MetricsDefinition("Returned because of rules", []mp.Metrics{
 			{Name: "rule-drop", Label: "Drop", Stacked: true, Diff: true},
 			{Name: "rule-nxdomain", Label: "Nxdomain", Stacked: true, Diff: true},
 			{Name: "rule-refused", Label: "Refused", Stacked: true, Diff: true},
 			{Name: "rule-servfail", Label: "Servfail", Stacked: true, Diff: true},
 			{Name: "rule-truncated", Label: "Truncated", Stacked: true, Diff: true},
 		}),
-		"fd": p.MetricsDefinition("FD usage", []mp.Metrics{
+		"fd": opt.MetricsDefinition("FD usage", []mp.Metrics{
 			{Name: "fd-usage", Label: "usage"},
 		}),
 	}
 }
 
-func (p *Plugin) FetchMetrics() (map[string]float64, error) {
-	req, err := http.NewRequest("GET", p.URL, nil)
+func (opt *Opt) FetchMetrics() (map[string]float64, error) {
+	req, err := http.NewRequest("GET", opt.getURL(), nil)
 	if err != nil {
 		return nil, err
 	}
-	if p.APIKey != "" {
-		req.Header.Add("X-API-Key", p.APIKey)
+	if apiKey := opt.getAPIKey(); apiKey != "" {
+		req.Header.Add("X-API-Key", apiKey)
 	}
-	res, err := p.httpClient().Do(req)
+	res, err := opt.httpClient().Do(req)
 	if err != nil {
 		return nil, err
 	}
@@ -131,9 +125,4 @@ func (p *Plugin) FetchMetrics() (map[string]float64, error) {
 		}
 	}
 	return result, nil
-}
-
-func (u *Plugin) Run() {
-	plugin := mp.NewMackerelPlugin(u)
-	plugin.Run()
 }

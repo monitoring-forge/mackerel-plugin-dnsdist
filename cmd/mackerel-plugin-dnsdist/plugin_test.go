@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -27,12 +28,15 @@ func TestFetchMetrics(t *testing.T) {
 	}))
 	defer ts.Close()
 
-	plugin := &Plugin{
-		URL:    ts.URL,
-		APIKey: expectedAPIKey,
+	opt := &Opt{
+		Host:    "127.0.0.1",
+		Port:    "8083",
+		APIKey:  expectedAPIKey,
+		Timeout: 5 * time.Second,
 	}
+	opt.testURL = ts.URL
 
-	metrics, err := plugin.FetchMetrics()
+	metrics, err := opt.FetchMetrics()
 	assert.NoError(t, err, "Expected no error from FetchMetrics")
 	assert.Equal(t, 7651.3982737482893, metrics["latency-avg100"], "Expected latency-avg100 metric to be 7651.3982737482893")
 	assert.Equal(t, 17.0, metrics["fd-usage"], "Expected fd-usage metric to be 17")
