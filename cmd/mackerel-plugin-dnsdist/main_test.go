@@ -32,24 +32,34 @@ func TestGetAPIKey(t *testing.T) {
 
 	{
 		opt := &Opt{}
-		apiKey := opt.GetAPIKey()
+		apiKey := opt.getAPIKey()
 		expectedAPIKey := "test-api-key"
 		assert.Equal(t, expectedAPIKey, apiKey, "Expected API key %s, but got %s", expectedAPIKey, apiKey)
 	}
 
 	{
 		opt := &Opt{APIKey: "explicit-api-key"}
-		apiKey := opt.GetAPIKey()
+		apiKey := opt.getAPIKey()
 		expectedAPIKey := "explicit-api-key"
 		assert.Equal(t, expectedAPIKey, apiKey, "Expected API key %s, but got %s", expectedAPIKey, apiKey)
 	}
 }
 
-func TestURL(t *testing.T) {
+func TestGetURL(t *testing.T) {
 	opt := &Opt{
 		Host: "localhost",
 		Port: "8083",
 	}
 	expectedURL := "http://localhost:8083/jsonstat?command=stats"
-	assert.Equal(t, expectedURL, opt.URL(), "Expected URL %s, but got %s", expectedURL, opt.URL())
+	assert.Equal(t, expectedURL, opt.getURL(), "Expected URL %s, but got %s", expectedURL, opt.getURL())
+}
+
+func TestGetURLWithTestURL(t *testing.T) {
+	opt := &Opt{
+		Host:    "localhost",
+		Port:    "8083",
+		testURL: "http://example.com/test",
+	}
+	expectedURL := "http://example.com/test"
+	assert.Equal(t, expectedURL, opt.getURL(), "Expected URL %s, but got %s", expectedURL, opt.getURL())
 }

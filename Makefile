@@ -1,9 +1,8 @@
 VERSION=0.0.5
-GITCOMMIT?=$(shell git describe --dirty --always 2>/dev/null)
-LDFLAGS=-ldflags "-w -s -X main.version=${VERSION} -X main.commit=${GITCOMMIT}"
+LDFLAGS=-ldflags "-w -s -X main.version=${VERSION}"
 all: mackerel-plugin-dnsdist
 
-.PHONY: mackerel-plugin-dnsdist
+.PHONY: mackerel-plugin-dnsdist linux check lint
 
 mackerel-plugin-dnsdist: cmd/mackerel-plugin-dnsdist/*.go
 	go build $(LDFLAGS) -o mackerel-plugin-dnsdist ./cmd/mackerel-plugin-dnsdist/

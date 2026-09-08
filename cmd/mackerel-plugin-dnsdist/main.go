@@ -1,27 +1,17 @@
 package main
 
 import (
-	"fmt"
 	"net"
 	"net/url"
 	"os"
-	"path/filepath"
 	"regexp"
-	"runtime"
 	"time"
 
-	"github.com/jessevdk/go-flags"
+	mp "github.com/mackerelio/go-mackerel-plugin"
+	"github.com/monitoring-forge/flagrun"
 )
 
 var version string
-var commit string
-
-const (
-	OK = iota
-	WARNING
-	CRITICAL
-	UNKNOWN
-)
 
 type Opt struct {
 	Version bool   `short:"v" long:"version" description:"Show version"`
@@ -31,10 +21,14 @@ type Opt struct {
 	Host    string        `short:"H" long:"hostname" default:"127.0.0.1" description:"Hostname"`
 	Timeout time.Duration `long:"timeout" default:"30s" description:"Timeout"`
 
-	APIKey string `long:"api-key" description:"api key"`
+	APIKey  string `long:"api-key" description:"api key"`
+	testURL string // for testing purposes, allows overriding the URL
 }
 
-func (o *Opt) URL() string {
+func (o *Opt) getURL() string {
+	if o.testURL != "" {
+		return o.testURL
+	}
 	url := url.URL{
 		Scheme:   "http",
 		Host:     net.JoinHostPort(o.Host, o.Port),
@@ -46,7 +40,7 @@ func (o *Opt) URL() string {
 
 var apiKeyRegexp = regexp.MustCompile(`setWebserverConfig\(.*\{.*\bapiKey\s*=\s*"(.+?)"`)
 
-func (o *Opt) GetAPIKey() string {
+func (o *Opt) getAPIKey() string {
 	if o.APIKey != "" {
 		return o.APIKey
 	}
@@ -72,36 +66,12 @@ func getAPIKeyFromFile(path string) string {
 	return string(res[0][1])
 }
 
+func (opt *Opt) Run(_ []string) {
+	plugin := mp.NewMackerelPlugin(opt)
+	plugin.Run()
+}
+
 func main() {
 	opt := &Opt{}
-	psr := flags.NewParser(opt, flags.HelpFlag|flags.PassDoubleDash)
-	_, err := psr.Parse()
-	if opt.Version {
-		if commit == "" {
-			commit = "dev"
-		}
-		fmt.Printf(
-			"%s-%s\n%s/%s, %s, %s\n",
-			filepath.Base(os.Args[0]),
-			version,
-			runtime.GOOS,
-			runtime.GOARCH,
-			runtime.Version(),
-			commit)
-		os.Exit(OK)
-	} else if flags.WroteHelp(err) {
-		fmt.Fprintf(os.Stdout, "%v\n", err)
-		os.Exit(OK)
-	} else if err != nil {
-		fmt.Fprintf(os.Stderr, "%v\n", err)
-		os.Exit(UNKNOWN)
-	}
-
-	u := &Plugin{
-		Prefix:  opt.Prefix,
-		Timeout: opt.Timeout,
-		URL:     opt.URL(),
-		APIKey:  opt.GetAPIKey(),
-	}
-	u.Run()
+	os.Exit(flagrun.Ship(opt, flagrun.Version(version)))
 }
