@@ -1,97 +1,97 @@
 # mackerel-plugin-dnsdist
 
-Mackerel Plugin for dnsdist, a highly DNS-, DoS- and abuse-aware load balancer.
+Mackerel プラグイン for dnsdist。dnsdist は DNS、DoS、不正アクセスを高度に意識したロードバランサーです。
 
 https://dnsdist.org/
 
-## Install
+## インストール
 
-Download from the release page or install via the Mackerel plugin registry:
+リリースページからダウンロードするか、Mackerel プラグインレジストリからインストールしてください:
 
 ```sh
 mkr plugin install monitoring-forge/mackerel-plugin-dnsdist
 ```
 
-## Requirements
+## 動作要件
 
-- dnsdist with the built-in webserver enabled and API key configured.
-- The plugin queries `GET /jsonstat?command=stats` on the dnsdist webserver.
-  See the [dnsdist webserver documentation](https://www.dnsdist.org/guides/webserver.html#get--jsonstat-query-parameters) for details.
+- 内蔵 Web サーバーが有効化され、API キーが設定された dnsdist。
+- このプラグインは dnsdist Web サーバーに対して `GET /jsonstat?command=stats` を問い合わせます。
+  詳細は [dnsdist Web サーバードキュメント](https://www.dnsdist.org/guides/webserver.html#get--jsonstat-query-parameters) を参照してください。
 
-## Usage
+## 使い方
 
 ```sh
 mackerel-plugin-dnsdist [OPTIONS]
 ```
 
-### Options
+### オプション
 
-| Option | Default | Description |
+| オプション | デフォルト | 説明 |
 | --- | --- | --- |
-| `-v`, `--version` | - | Show version information |
-| `-p`, `--port` | `8083` | Port number of the dnsdist webserver |
-| `-H`, `--hostname` | `127.0.0.1` | Hostname or IP address of the dnsdist webserver |
-| `--prefix` | `dnsdist` | Metric key prefix used in Mackerel |
-| `--timeout` | `30s` | HTTP request timeout |
-| `--api-key` | - | API key for the dnsdist webserver (X-API-Key header) |
+| `-v`, `--version` | - | バージョン情報を表示する |
+| `-p`, `--port` | `8083` | dnsdist Web サーバーのポート番号 |
+| `-H`, `--hostname` | `127.0.0.1` | dnsdist Web サーバーのホスト名または IP アドレス |
+| `--prefix` | `dnsdist` | Mackerel で使用するメトリックキーのプレフィックス |
+| `--timeout` | `30s` | HTTP リクエストのタイムアウト |
+| `--api-key` | - | dnsdist Web サーバーの API キー（X-API-Key ヘッダー） |
 
-## Authentication
+## 認証
 
-The plugin uses the API key to authenticate against the dnsdist webserver.
-The key is sent in the `X-API-Key` request header.
+このプラグインは API キーを使用して dnsdist Web サーバーに対して認証を行います。
+キーは `X-API-Key` リクエストヘッダーに含めて送信されます。
 
-The API key is resolved in the following order:
+API キーは以下の順序で解決されます:
 
-1. The value provided via the `--api-key` option.
-2. The value read from the file specified by the `DNSDIST_CONFIG_PATH` environment variable.
-3. The value read from `/etc/dnsdist/dnsdist.conf`.
+1. `--api-key` オプションで指定された値。
+2. 環境変数 `DNSDIST_CONFIG_PATH` で指定されたファイルから読み取られた値。
+3. `/etc/dnsdist/dnsdist.conf` から読み取られた値。
 
-When reading from a dnsdist configuration file, the plugin extracts the key from a line like:
+dnsdist 設定ファイルから読み取る場合、プラグインは以下のような行からキーを抽出します:
 
 ```lua
 setWebserverConfig(..., { ..., apiKey = "supersecretAPIkey", ... })
 ```
 
-## Metrics
+## メトリクス
 
-This plugin collects the following metrics from `/jsonstat?command=stats`.
-For the full list of statistics returned by dnsdist, refer to the [dnsdist statistics documentation](https://www.dnsdist.org/statistics.html).
+このプラグインは `/jsonstat?command=stats` から以下のメトリクスを収集します。
+dnsdist が返す統計情報の全一覧については、[dnsdist 統計情報ドキュメント](https://www.dnsdist.org/statistics.html) を参照してください。
 
-| Graph | Metric | Description |
+| グラフ | メトリック | 説明 |
 | --- | --- | --- |
-| acl-drop | acl-drops | Number of packets dropped because of the ACL |
-| cache | cache-hits | Number of times an answer was retrieved from cache |
-| cache | cache-misses | Number of times an answer was not found in cache |
-| downstream-errors | downstream-send-errors | Number of errors when sending a query to a backend |
-| downstream-errors | downstream-timeouts | Number of queries not answered in time by a backend |
-| latency | latency-avg100 | Average response latency in microseconds of the last 100 packets |
-| latency | latency-avg1000 | Average response latency in microseconds of the last 1000 packets |
-| latency | latency-avg10000 | Average response latency in microseconds of the last 10000 packets |
-| latency | latency-avg1000000 | Average response latency in microseconds of the last 1000000 packets |
-| queries | queries | Number of received queries |
-| queries | rdqueries | Number of received queries with the recursion desired bit set |
-| responses | responses | Number of responses received from backends |
-| responses | self-answered | Number of self-answered responses |
-| responses | servfail-responses | Number of SERVFAIL answers received from backends |
-| rule | rule-drop | Number of queries dropped because of a rule |
-| rule | rule-nxdomain | Number of NXDomain answers returned because of a rule |
-| rule | rule-refused | Number of Refused answers returned because of a rule |
-| rule | rule-servfail | Number of SERVFAIL answers returned because of a rule |
-| rule | rule-truncated | Number of truncated answers returned because of a rule |
-| fd | fd-usage | Number of currently used file descriptors |
+| acl-drop | acl-drops | ACL によってドロップされたパケット数 |
+| cache | cache-hits | キャッシュから回答が取得された回数 |
+| cache | cache-misses | キャッシュに回答が見つからなかった回数 |
+| downstream-errors | downstream-send-errors | バックエンドにクエリを送信した際のエラー数 |
+| downstream-errors | downstream-timeouts | バックエンドから時間内に回答が返ってこなかったクエリ数 |
+| latency | latency-avg100 | 直近 100 パケットの平均応答レイテンシー（マイクロ秒） |
+| latency | latency-avg1000 | 直近 1000 パケットの平均応答レイテンシー（マイクロ秒） |
+| latency | latency-avg10000 | 直近 10000 パケットの平均応答レイテンシー（マイクロ秒） |
+| latency | latency-avg1000000 | 直近 1000000 パケットの平均応答レイテンシー（マイクロ秒） |
+| queries | queries | 受信したクエリ数 |
+| queries | rdqueries | 再帰希望ビットが設定された受信クエリ数 |
+| responses | responses | バックエンドから受信した応答数 |
+| responses | self-answered | 自己応答した応答数 |
+| responses | servfail-responses | バックエンドから受信した SERVFAIL 回答数 |
+| rule | rule-drop | ルールによってドロップされたクエリ数 |
+| rule | rule-nxdomain | ルールによって返された NXDomain 回答数 |
+| rule | rule-refused | ルールによって返された Refused 回答数 |
+| rule | rule-servfail | ルールによって返された SERVFAIL 回答数 |
+| rule | rule-truncated | ルールによって返された切り詰め応答数 |
+| fd | fd-usage | 現在使用中のファイルディスクリプタ数 |
 
-## Example
+## 例
 
 ```sh
 mackerel-plugin-dnsdist -H 127.0.0.1 -p 8083 --api-key supersecretAPIkey
 ```
 
-Or with a custom metric prefix:
+カスタムメトリックプレフィックスを指定する場合:
 
 ```sh
 mackerel-plugin-dnsdist -H 127.0.0.1 -p 8083 --prefix dnsdist-prod
 ```
 
-## License
+## ライセンス
 
-See [LICENSE](LICENSE).
+[LICENSE](LICENSE) を参照してください。
