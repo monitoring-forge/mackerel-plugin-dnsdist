@@ -16,6 +16,6 @@ require (
 require (
 	github.com/jessevdk/go-flags v1.6.1 // indirect
 	github.com/mackerelio/golib v1.2.2 // indirect
-	github.com/monitoring-forge/flagrun v0.0.9
-	golang.org/x/text v0.41.0
+	github.com/monitoring-forge/flagrun v0.0.10
+	golang.org/x/text v0.42.0
 )
