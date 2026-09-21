@@ -1,5 +1,10 @@
 # Changelog
 
+## [v0.0.7](https://github.com/monitoring-forge/mackerel-plugin-dnsdist/compare/v0.0.6...v0.0.7) - 2026-09-21
+
+- ci: bump Songmu/tagpr from 1.20.2 to 1.20.3 in the dependencies group by @dependabot[bot] in https://github.com/monitoring-forge/mackerel-plugin-dnsdist/pull/12
+- go: bump the dependencies group with 2 updates by @dependabot[bot] in https://github.com/monitoring-forge/mackerel-plugin-dnsdist/pull/13
+
 ## [v0.0.6](https://github.com/monitoring-forge/mackerel-plugin-dnsdist/compare/v0.0.5...v0.0.6) - 2026-09-08
 
 - Sync files with `monitoring-forge/github-common` by @monitoring-forge-files-sync-action[bot] in https://github.com/monitoring-forge/mackerel-plugin-dnsdist/pull/4
