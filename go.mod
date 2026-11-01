@@ -9,7 +9,7 @@ require (
 
 require (
 	github.com/mackerelio/checkers v0.2.1 // indirect
-	go.yaml.in/yaml/v3 v3.0.5 // indirect
+	go.yaml.in/yaml/v3 v3.0.6 // indirect
 	golang.org/x/sys v0.49.0 // indirect
 )
 
